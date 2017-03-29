@@ -44,8 +44,51 @@ fig0 = Figure(data=data0) # plot of flips per minute
 unique_url0 = py.plot(fig0, filename='Flip')
 s0.open()
 
+#### Setup google sheets
+
+from quickstart import *
+credentials = get_credentials()
+http = credentials.authorize(httplib2.Http())
+discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?'
+                    'version=v4')
+service = discovery.build('sheets', 'v4', http=http,
+                              discoveryServiceUrl=discoveryUrl)
+
+spreadsheetId = '13EIFVg-c4Stt2fMWg3Lg2taKF_ykiljBJsN0ovEe6VI'
+data = [ 
+	{
+  	"range": "Sheet1!A1:A5",
+  	"majorDimension": "ROWS",
+  	"values": [
+    	["Timestamp"]
+  	],
+	}
+	]
+
+body = {
+  'valueInputOption': 'USER_ENTERED',
+  'data': data
+}
+result = service.spreadsheets().values().batchUpdate(
+    spreadsheetId=spreadsheetId, body=body).execute()
+
+######### Get signal, send to gsheets and plotly
+t = datetime.datetime.now()
 while(True):
-	s0.write(datetime.datetime.now().time(),ldr.value)
+	if (ldr.value > 0):
+		val = 1
+	else:
+		val = 0
+	
+	s0.write(datetime.datetime.now().time(),val)
+
+	if (val == 1):
+		new_t = datetime.datetime.now()
+		dt = new_t - t
+		if (divmod(dt.days*86400 + dt.seconds, 60)[1] > 5):
+			t = new_t
+	s0.write(datetime.datetime.now().time(),val)
+	
 	time.sleep(0.1)
 
  
