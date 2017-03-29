@@ -57,7 +57,7 @@ service = discovery.build('sheets', 'v4', http=http,
 spreadsheetId = '13EIFVg-c4Stt2fMWg3Lg2taKF_ykiljBJsN0ovEe6VI'
 data = [ 
 	{
-  	"range": "Sheet1!A1:A5",
+  	"range": "Sheet1!A1:B1",
   	"majorDimension": "ROWS",
   	"values": [
     	["Timestamp"]
@@ -69,25 +69,48 @@ body = {
   'valueInputOption': 'USER_ENTERED',
   'data': data
 }
-result = service.spreadsheets().values().batchUpdate(
+result = service.spreadsheets().values().update(
     spreadsheetId=spreadsheetId, body=body).execute()
+
+def write2sheets(t):
+	data = [
+        {
+        "range": "Sheet1!A1:B1",
+        "majorDimension": "ROWS",
+        "values": [
+        [t]
+        ],
+        }
+        ]
+
+	body = {
+  	'valueInputOption': 'USER_ENTERED',
+  	'data': data
+	}
+	
+	result = service.spreadsheets().values().append(spreadsheetId=spreadsheetId, body=body).execute()
+
 
 ######### Get signal, send to gsheets and plotly
 t = datetime.datetime.now()
 while(True):
+	new_t = datetime.datetime.now()
 	if (ldr.value > 0):
 		val = 1
 	else:
 		val = 0
 	
-	s0.write(datetime.datetime.now().time(),val)
+	s0.write(new_t.time(),val)
 
 	if (val == 1):
-		new_t = datetime.datetime.now()
 		dt = new_t - t
 		if (divmod(dt.days*86400 + dt.seconds, 60)[1] > 5):
 			t = new_t
-	s0.write(datetime.datetime.now().time(),val)
+			write2sheet(t)
+		else:
+			continue
+	else:
+		continue
 	
 	time.sleep(0.1)
 
