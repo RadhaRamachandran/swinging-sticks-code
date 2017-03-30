@@ -42,6 +42,7 @@ trace0 = Scatter(
 data0 = Data([trace0])
 fig0 = Figure(data=data0) # plot of flips per minute
 unique_url0 = py.plot(fig0, filename='Flip')
+s0 = py.Stream(stream_ids[0])
 s0.open()
 
 #### Setup google sheets
