@@ -78,9 +78,8 @@ def write2sheets(t):
         {
         "range": "Sheet1!A1:B1",
         "majorDimension": "ROWS",
-        "values": [
-        [t]
-        ],
+        "values": 
+		[t]
         }
         ]
 
