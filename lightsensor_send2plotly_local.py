@@ -47,9 +47,11 @@ s0 = py.Stream(stream_ids[0])
 s0.open()
 
 while(True):
-	x = datetime.datetime.now().time()
-	y = ldr.value
-	s0.write(dict(x = datetime.datetime.now().time(),y = ldr.value))
+	t = datetime.datetime.now().time()
+	val = ldr.value
+	if (val > 0.0):
+		val = 1
+	s0.write(dict(x = t ,y = val))
 	time.sleep(0.1)
 
  
