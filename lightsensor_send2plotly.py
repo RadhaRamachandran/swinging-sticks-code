@@ -58,9 +58,9 @@ service = discovery.build('sheets', 'v4', http=http,
 spreadsheetId = '13EIFVg-c4Stt2fMWg3Lg2taKF_ykiljBJsN0ovEe6VI'
 data = [ 
 	{
-  	"range": "Sheet1!A1:B1",
-  	"majorDimension": "ROWS",
-  	"values": [
+  	'range': 'Sheet1!A1:B2',
+  	'majorDimension': 'ROWS',
+  	'values': [
     	["Timestamp"]
   	],
 	}
@@ -70,26 +70,20 @@ body = {
   'valueInputOption': 'USER_ENTERED',
   'data': data
 }
-result = service.spreadsheets().values().update(
-    spreadsheetId=spreadsheetId, body=body).execute()
+result = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body=body).execute()
 
 def write2sheets(t):
-	data = [
-        {
-        "range": "Sheet1!A1:B1",
-        "majorDimension": "ROWS",
-        "values": 
-		[t]
-        }
-        ]
+	spreadsheet_id = '13EIFVg-c4Stt2fMWg3Lg2taKF_ykiljBJsN0ovEe6VI'
+	range_ = "Sheet1!A1"
 
-	body = {
-  	'valueInputOption': 'USER_ENTERED',
-  	'data': data
+	body = { 
+  	"values": [
+	[t]
+	] 
 	}
 	
-	result = service.spreadsheets().values().append(spreadsheetId=spreadsheetId, body=body).execute()
-
+	result = service.spreadsheets().values().append(spreadsheetId=spreadsheetId, range= range_, valueInputOption= 'USER_ENTERED', insertDataOption = 'INSERT_ROWS',  body=body).execute()
+	####print(result)
 
 ######### Get signal, send to gsheets and plotly
 t = datetime.datetime.now()
@@ -97,22 +91,17 @@ while(True):
 	new_t = datetime.datetime.now()
 	if (ldr.value > 0):
 		val = 1
+		dt = new_t - t
+                print (dt)
+                if (divmod(dt.days*86400 + dt.seconds, 60)[1] > 1):
+                        t = new_t
+                        write2sheets(t.strftime('%Y-%m-%d %H:%M:%S'))
+                else:
+                        continue
+
 	else:
 		val = 0
-	
-	s0.write(new_t.time(),val)
-
-	if (val == 1):
-		dt = new_t - t
-		if (divmod(dt.days*86400 + dt.seconds, 60)[1] > 5):
-			t = new_t
-			write2sheet(t)
-		else:
-			continue
-	else:
-		continue
-	
-	time.sleep(0.1)
+	s0.write(dict(x = new_t.time(),y =val))
 
  
 
